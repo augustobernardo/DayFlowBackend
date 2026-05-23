@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 
 namespace DayFlowAPI.Extensions;
 
@@ -38,12 +39,24 @@ public static class ServiceExtensions
                 }
             );
 
-            c.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
-            {
-                { new OpenApiSecuritySchemeReference("Bearer"), new List<string>() },
-            });
+            c.AddSecurityRequirement(
+                new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer",
+                            },
+                        },
+                        Array.Empty<string>()
+                    },
+                }
+            );
 
-            c.OperationFilter<AuthorizeCheckOperationFilter>();
+            // c.OperationFilter<AuthorizeCheckOperationFilter>();
         });
 
         // PostgreSQL + Entity Framework Core
