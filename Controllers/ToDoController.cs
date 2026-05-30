@@ -29,7 +29,7 @@ namespace DayFlowAPI.Controllers
             return Ok(todos);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:Guid}")]
         public async Task<IActionResult> GetToDoById(Guid id)
         {
             var userId = GetCurrentUserId();
