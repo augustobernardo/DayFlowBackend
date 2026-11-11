@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using DayFlowAPI.Models.Entities;
+using DayFlowAPI.Models.Requests;
 using DayFlowAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,24 +41,34 @@ namespace DayFlowAPI.Controllers
             return Ok(todo);
         }
 
+        private static ToDoItem ToEntity(ToDoItemRequest request, Guid id = default) =>
+            new()
+            {
+                Id = id,
+                Title = request.Title,
+                Description = request.Description,
+                Priority = request.Priority,
+                Status = request.Status,
+                IsCompleted = request.IsCompleted,
+                DueDate = request.DueDate,
+                CompletedAt = request.CompletedAt,
+            };
+
         [HttpPost]
-        public async Task<IActionResult> CreateToDo([FromBody] ToDoItem item)
+        public async Task<IActionResult> CreateToDo([FromBody] ToDoItemRequest request)
         {
             var userId = GetCurrentUserId();
-            var created = await _toDoService.CreateAsync(item, userId);
+            var created = await _toDoService.CreateAsync(ToEntity(request), userId);
             return CreatedAtAction(nameof(GetToDoById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id:Guid}")]
-        public async Task<IActionResult> UpdateToDo(Guid id, [FromBody] ToDoItem item)
+        public async Task<IActionResult> UpdateToDo(Guid id, [FromBody] ToDoItemRequest request)
         {
-            if (id != item.Id)
-                return BadRequest("O ID da URL deve corresponder ao ID do item.");
-
             var userId = GetCurrentUserId();
             try
             {
-                await _toDoService.UpdateAsync(item, userId);
+                await _toDoService.UpdateAsync(ToEntity(request, id), userId);
                 return NoContent();
             }
             catch (InvalidOperationException ex)
